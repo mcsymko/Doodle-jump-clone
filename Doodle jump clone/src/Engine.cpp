@@ -1,15 +1,18 @@
 #include "pch.h"
 #include "Engine.h"
 
-//Constructor & destructor
+//Constructor
 Engine::Engine()
-	: gameOver(false), dt()
+	: gameOver(false), timer(), enemySpawned(false), delay2(), timer2()
 {
 	mWindow.create(sf::VideoMode(400, 533), "Doodle jump clone", sf::Style::Close);
 	mWindow.setFramerateLimit(60);
 	std::cout << "[GAME]: Window created successfully!" << "\n";
+
+	delay = rand() % 10 + 15;
 }
 
+//Destructor
 Engine::~Engine()
 {
 	std::cout << "[GAME]: Game over!" << "\n";
@@ -31,6 +34,12 @@ const bool& Engine::isGameRunning()
 	{
 		gameOver = true;
 	}
+
+	if (enemySpawned && doodle.getBounds().intersects(enemy.getBounds()))
+	{
+		gameOver = true;
+	}
+
 	return gameOver;
 }
 
@@ -68,7 +77,7 @@ void Engine::platformSpawn()
 		for (int i = 0; i < 10; i++)
 		{
 			doodle.setY(doodle.getDoodleH());
-			platforms[i].getPlatformY() = platforms[i].getPlatformY() - doodle.getdoodleDY();
+			platforms[i].setY(platforms[i].getPlatformY() - doodle.getdoodleDY());
 
 			if (platforms[i].getPlatformY() > 533)
 			{
@@ -76,22 +85,62 @@ void Engine::platformSpawn()
 				platforms[i].setX(rand() % 400);
 			}
 		}
+		enemy.setEnemyY(enemy.getEnemyY() - doodle.getdoodleDY());
+		if (enemy.getEnemyY() > 533)
+		{
+			Timer2();
+		}
+	}
+}
+
+void Engine::enemySpawn()
+{
+	enemy.setEnemyX(rand() % 400);
+	enemy.setEnemyY(0);
+}
+
+void Engine::Timer()
+{
+	float time = mClock.getElapsedTime().asSeconds();
+	mClock.restart();
+	timer += time;
+	if (timer > delay)
+	{
+		timer = 0;
+		enemySpawn();
+		enemySpawned = true;
+	}
+}
+
+void Engine::Timer2()
+{
+	delay2 = rand() % 10 + 15;
+	float time2 = mClock.getElapsedTime().asSeconds();
+	mClock2.restart();
+	timer2 += time2;
+	if (timer2 > delay2)
+	{
+		timer2 = 0;
+		enemySpawn();
 	}
 }
 
 void Engine::update()
 {
 	pollEvents();
+	Timer();
 	for (int i = 0; i < 10; i++)
 	{
 		platforms[i].update();
 	}
 	doodle.update();
+	enemy.update();
 	platformSpawn();
 	doodleLanding();
 
 	doodle.checkDoodlePosition();
 	doodle.setPosition(sf::Vector2f(doodle.getDoodleX(), doodle.getDoodleY()));
+	
 }
 
 void Engine::render()
@@ -104,5 +153,10 @@ void Engine::render()
 		platforms[i].render(mWindow);
 	}
 	platforms->render(mWindow);
+	if (enemySpawned)
+	{
+		enemy.render(mWindow);
+	}
+	/*std::cout << doodle.getDoodleX() << ", " << doodle.getDoodleY() << ", " << doodle.getDoodleH() << std::endl;*/
 	mWindow.display();
 }

@@ -10,6 +10,7 @@ public:
 	int& getDoodleY();
 	int& getDoodleH();
 	float& getdoodleDY();
+	const sf::FloatRect getBounds() const;
 	const bool& isDoodleDead();
 
 	//Setters

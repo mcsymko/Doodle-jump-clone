@@ -34,6 +34,11 @@ float& Doodle::getdoodleDY()
 	return dy;
 }
 
+const sf::FloatRect Doodle::getBounds() const
+{
+	return doodle.getGlobalBounds();
+}
+
 const bool& Doodle::isDoodleDead()
 {
 	return endofgame;
